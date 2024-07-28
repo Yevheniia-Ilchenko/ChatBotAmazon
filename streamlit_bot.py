@@ -66,7 +66,8 @@ if 'greeted' not in st.session_state:
 if not st.session_state.greeted:
     st.session_state.greeted = [
         {"role": "system",
-         "content": "Hi! I can help you with questions about the Amazon return policy. How can I help you today?"}
+         "content": "Hi! I can help you with questions about the Amazon return policy."
+                    " How can I help you today?"}
     ]
 
 for msg in st.session_state.greeted:
