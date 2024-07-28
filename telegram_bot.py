@@ -1,19 +1,17 @@
-import streamlit as st
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 import os
 from dotenv import load_dotenv
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
-
-
-USER_AGENT = os.environ.get('USER_AGENT')
-
-load_dotenv()
-
 from langchain_community.document_loaders import WebBaseLoader
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores.faiss import FAISS
 from langchain.chains import create_retrieval_chain
+
+
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+USER_AGENT = os.environ.get('USER_AGENT')
+load_dotenv()
 
 
 def get_documents_from_web(url):
@@ -56,36 +54,3 @@ def create_chain(vectorStore):
 docs = get_documents_from_web("https://www.amazon.co.uk/gp/help/customer/display.html?nodeId=GKM69DUUYKQWKWX7")
 vectorStore = create_db(docs)
 chain = create_chain(vectorStore)
-
-
-st.title("ChatBot for Amazon")
-
-if 'greeted' not in st.session_state:
-    st.session_state.greeted = False
-
-if not st.session_state.greeted:
-    st.session_state.greeted = [
-        {"role": "system",
-         "content": "Hi! I can help you with questions about the Amazon return policy. How can I help you today?"}
-    ]
-
-for msg in st.session_state.greeted:
-    st.write(f"{msg['role'].capitalize()}: {msg['content']}")
-
-user_input = st.text_input("You: ", key="input")
-
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
-
-
-if st.button("Send"):
-    if user_input:
-        response = chain.invoke({
-            "input": user_input
-        })
-        st.session_state.chat_history.append((user_input, response["answer"]))
-
-if st.session_state.chat_history:
-    for question, answer in st.session_state.chat_history:
-        st.write(f"Q: {question}")
-        st.write(f"A: {answer}")
